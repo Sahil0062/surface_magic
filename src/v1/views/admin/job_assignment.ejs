@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Assignment</title>
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+  <link rel="stylesheet" href="/assets/css/custom.css" />
+</head>
+
+<body>
+  <div class="main_section">
+    <div class="flex_main_sec">
+      <!-- sidebar -->
+
+      <%- include('../partials/sidebar') %>
+
+        <!-- Inner section -->
+        <div class="inner_section">
+          <!-- Header -->
+          <%- include('../partials/header') %>
+
+
+            <!-- Body Content Here -->
+            <div class="body_content">
+              <div class="block_section common_heading">
+                <div class="cont">
+                  <h2>Job Assignment</h2>
+                  <h3>Create, assign, and manage all jobs</h3>
+                </div>
+                <div class="button">
+                  <a class="btn" data-bs-toggle="modal" data-bs-target="#staticBackdrop_two"><i
+                      class="bi bi-plus-lg"></i>Create Job</a>
+                </div>
+              </div>
+
+              <!-- Common Search bar -->
+              <div class="common_search">
+                <div class="form-group">
+    <form method="GET" action="/admin/job-assignment" class="form-group d-flex">
+
+<input
+type="text"
+name="search"
+value="<%= search || '' %>"
+class="form-control"
+placeholder="Search jobs..."
+>
+
+<button type="submit">
+<i class="bi bi-search"></i>
+</button>
+
+</form>
+  </div>
+
+                <div class="filter">
+                  <div class="dropdown">
+                    <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="bi bi-funnel"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li>
+                        <a class="dropdown-item <%= selectedStatus === 'assigned' ? 'active' : '' %>"
+                          href="/admin/job-assignment?status=assigned">Assigned</a>
+                      </li>
+
+                      <li>
+                        <a class="dropdown-item <%= selectedStatus === 'clocked_in' ? 'active' : '' %>"
+                          href="/admin/job-assignment?status=clocked_in">Clocked In</a>
+                      </li>
+
+                      <li>
+                        <a class="dropdown-item <%= selectedStatus === 'in_progress' ? 'active' : '' %>"
+                          href="/admin/job-assignment?status=in_progress">In Progress</a>
+                      </li>
+
+                      <li>
+                        <a class="dropdown-item <%= selectedStatus === 'completed' ? 'active' : '' %>"
+                          href="/admin/job-assignment?status=completed">Completed</a>
+                      </li>
+
+                      <li>
+                        <a class="dropdown-item <%= selectedStatus === 'job_done' ? 'active' : '' %>"
+                          href="/admin/job-assignment?status=job_done">Job Done</a>
+                      </li>
+
+                      <li>
+                        <a class="dropdown-item <%= !selectedStatus ? 'active' : '' %>"
+                          href="/admin/job-assignment">All</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Table Section Ends Here -->
+
+              <div class="recent_order job_table">
+                <!-- <h2>Recent Activity</h2> -->
+
+                <div class="table-responsive">
+                  <table class="table Assignment">
+                    <thead>
+                      <tr>
+                        <th scope="col">Job Details</th>
+                        <th scope="col">Assigned To</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Client</th>
+                        <th scope="col">Complete</th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% jobs.forEach(job=> { %>
+
+                        <tr>
+
+                          <td>
+                            <div class="Website">
+                              <%= job.title %>
+                                <span>
+                                  <%= job.description || '-' %>
+                                </span>
+                            </div>
+                          </td>
+
+                          <td>
+                            <div class="mail">
+                              <%= job.emp_name || 'Not Assigned' %>
+                                <span>
+                                  <%= job.emp_email || '' %>
+                                </span>
+                            </div>
+                          </td>
+
+                          <td>
+                            <%= job.job_date ? new Date(Number(job.job_date)).toLocaleDateString() : '-' %>
+                              <span class="time">
+                                <%= job.start_time ? new Date(Number(job.start_time)).toLocaleTimeString([],
+                                  {hour:'2-digit', minute:'2-digit'}) : '-' %>
+                              </span>
+                          </td>
+
+                          <td>
+                            <div class="mail">
+                              <%= job.client_name || 'No Client' %>
+                                <span>
+                                  <%= job.client_email || '' %>
+                                </span>
+                            </div>
+                          </td>
+
+                          <td>
+                            <div class="enable_btn">
+                              <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" data-id="<%= job.id %>"
+                                  onchange="updateStatus(this.dataset.id, this.checked)" <%=job.status==='completed'
+                                  ? 'checked' : '' %> />
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>
+                            <div class="action_btn">
+
+                              <a href="/admin/job-detail/<%= job.id %>" class="detele">
+                                <i class="bi bi-eye"></i>
+                              </a>
+
+                              <a class="detele green"><i class="bi bi-download"></i></a>
+
+                              <a class="detele red" data-id="<%= job.id %>" onclick="deleteJob(this.dataset.id)">
+                                <i class="bi bi-trash3"></i>
+                              </a>
+
+                              <a class="detele green" data-job='<%- JSON.stringify(job) %>'
+                                onclick="openEditJob(JSON.parse(this.dataset.job))">
+                                <i class="bi bi-pencil-square"></i>
+                              </a>
+
+                            </div>
+                          </td>
+
+                        </tr>
+
+                        <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Pagination -->
+              <%- include('../partials/pagination', {
+  currentPage,
+  totalPages,
+  baseUrl: '/admin/job-assignment',
+  search,
+  selectedStatus
+}) %>
+            </div>
+
+            <!-- Footer -->
+
+            <%- include('../partials/footer') %>
+        </div>
+    </div>
+  </div>
+
+  <!-- Add Employee Modal -->
+  <div class="modal fade Employee_popup" id="staticBackdrop_two" data-bs-backdrop="static" data-bs-keyboard="false"
+    tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5" id="staticBackdropLabel">
+            Create New Job
+          </h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="createJobForm">
+          <input type="hidden" id="jobId">
+          <div class="modal-body">
+
+            <div class="form-group">
+              <label>Job Title</label>
+              <input type="text" id="jobTitle" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="jobDescription" class="form-control"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" id="jobAddress" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="jobDate" class="form-control" required>
+            </div>
+
+            <div class="grid_box">
+
+              <div class="form-group">
+                <label>Assign To</label>
+                <select id="jobUserId" class="form-select">
+                  <option value="">Select Employee</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Client</label>
+                <select id="jobClient" class="form-select">
+                  <option value="">Select Client</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Start Time</label>
+                <input type="time" id="jobStartTime" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label>End Time</label>
+                <input type="time" id="jobEndTime" class="form-control">
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Job</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="/assets/js/custom.js"></script>
+  <script>
+    document.getElementById("createJobForm")
+      .addEventListener("submit", async function (e) {
+
+        e.preventDefault();
+
+        const jobId = document.getElementById("jobId").value;   // 👈 check edit
+
+        const userId = document.getElementById("jobUserId").value;
+        const clientId = document.getElementById("jobClient").value;
+
+       if (!userId || !clientId) {
+  console.log("Employee and Client required");
+  return;
+}
+
+const dateVal = document.getElementById("jobDate").value;
+if (!dateVal) {
+  console.log("Job Date required");
+  return;
+}
+
+        const body = {
+          id: jobId || null,
+          title: document.getElementById("jobTitle").value,
+          description: document.getElementById("jobDescription").value,
+          address: document.getElementById("jobAddress").value,
+          date: dateVal,
+          user_id: userId,
+          client_id: clientId,
+          start_time: document.getElementById("jobStartTime").value || null,
+          end_time: document.getElementById("jobEndTime").value || null
+        };
+
+        console.log("Sending:", body);
+
+        // 👇 decide create OR update
+        const url = jobId
+          ? "/admin/update-job"
+          : "/admin/create-job";
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        // alert(data.message || "Saved");
+
+        if (res.ok) location.reload();
+      });
+  </script>
+  <script>
+    document.querySelector('[data-bs-target="#staticBackdrop_two"]')
+      .addEventListener("click", () => {
+
+        document.getElementById("createJobForm").reset();
+        document.getElementById("jobId").value = "";
+
+        // ⭐ ADD THIS LINE HERE
+        document.getElementById("staticBackdropLabel").innerText = "Create New Job";
+
+      });
+  </script>
+  <script>
+
+    async function loadDropdowns() {
+
+      try {
+
+        // ---------- EMPLOYEES ----------
+        const empRes = await fetch("/admin/employees");
+        const empJson = await empRes.json();
+
+        const empSelect = document.getElementById("jobUserId");
+        empSelect.innerHTML = `<option value="">Select Employee</option>`;
+
+        empJson.data.forEach(emp => {
+          empSelect.insertAdjacentHTML("beforeend",
+            `<option value="${emp.id}">
+           ${emp.name} (${emp.email})
+         </option>`
+          );
+        });
+
+
+        // ---------- CLIENTS ----------
+        const cliRes = await fetch("/admin/clients");
+        const cliJson = await cliRes.json();
+
+        const cliSelect = document.getElementById("jobClient");
+        cliSelect.innerHTML = `<option value="">Select Client</option>`;
+
+        cliJson.data.forEach(cli => {
+          cliSelect.insertAdjacentHTML("beforeend",
+            `<option value="${cli.id}">
+           ${cli.name} (${cli.email})
+         </option>`
+          );
+        });
+
+      } catch (err) {
+        console.error("Dropdown load error:", err);
+      }
+    }
+
+    // Run when page loads
+    // loadDropdowns();
+    document.addEventListener("DOMContentLoaded", loadDropdowns);
+
+    async function updateStatus(jobId, checked) {
+      try {
+        const res = await fetch("/admin/update-job-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            job_id: jobId,
+            status: checked ? "completed" : "assigned"
+          })
+        });
+
+        const data = await res.json();
+        console.log("Status updated:", data);
+
+      } catch (err) {
+        console.error("Status update failed:", err);
+        // alert("Failed to update job status");
+        console.error("Failed to update job status");
+      }
+    }
+
+
+    async function deleteJob(jobId) {
+      // if (!confirm("Delete this job?")) return;
+
+      const res = await fetch("/admin/delete-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job_id: jobId })
+      });
+
+      const data = await res.json();
+      // alert(data.message);
+      location.reload();
+    }
+
+
+    function openEditJob(job) {
+      document.getElementById("staticBackdropLabel").innerText = "Edit Job";
+      // set id
+      document.getElementById("jobId").value = job.id;
+
+      // title / desc / address
+      document.getElementById("jobTitle").value = job.title || "";
+      document.getElementById("jobDescription").value = job.description || "";
+      document.getElementById("jobAddress").value = job.address || "";
+
+      // date
+      if (job.job_date) {
+        document.getElementById("jobDate").value =
+          new Date(Number(job.job_date)).toISOString().split("T")[0];
+      }
+
+      // start time
+      if (job.start_time) {
+        document.getElementById("jobStartTime").value =
+          new Date(Number(job.start_time)).toTimeString().slice(0, 5);
+      }
+
+      // end time
+      if (job.end_time) {
+        document.getElementById("jobEndTime").value =
+          new Date(Number(job.end_time)).toTimeString().slice(0, 5);
+      }
+
+      // dropdowns
+      document.getElementById("jobUserId").value = job.user_id || "";
+      document.getElementById("jobClient").value = job.client_id || "";
+
+      // open modal
+      new bootstrap.Modal(document.getElementById("staticBackdrop_two")).show();
+    }
+  </script>
+</body>
+
+</html>

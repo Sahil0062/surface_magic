@@ -1,0 +1,48 @@
+<div class="custom-pagination">
+
+    <!-- PREVIOUS -->
+    <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>" class="page-btn prev">«</a>
+    <% } %>
+
+    <% 
+    let start = currentPage;
+    let end = currentPage + 1;
+
+    if(currentPage === 1){
+        start = 1;
+        end = Math.min(2, totalPages);
+    }
+
+    if(currentPage === totalPages){
+        start = Math.max(totalPages - 1, 1);
+        end = totalPages;
+    }
+    %>
+
+    <!-- PAGE NUMBERS -->
+    <% for(let i = start; i <= end; i++) { %>
+        <a href="?page=<%= i %>"
+           class="page-btn <%= i === currentPage ? 'active' : '' %>">
+           <%= i %>
+        </a>
+    <% } %>
+
+    <!-- DOTS -->
+    <% if(end < totalPages - 1){ %>
+        <span class="dots">...</span>
+    <% } %>
+
+    <!-- LAST PAGE -->
+    <% if(end < totalPages){ %>
+        <a href="?page=<%= totalPages %>" class="page-btn">
+            <%= totalPages %>
+        </a>
+    <% } %>
+
+    <!-- NEXT -->
+    <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>" class="page-btn next">»</a>
+    <% } %>
+
+</div>
