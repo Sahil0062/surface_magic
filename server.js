@@ -1,4 +1,4 @@
-import http from "http";
+import http from "node:http";
 import dotenv from "dotenv";
 import app from "./src/app.js";
 import { testConnection } from "./src/v1/config/database.js";

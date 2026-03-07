@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import path from "path";
+import path from "node:path";
 import userRoutes from "./v1/routes/api/userRoutes.js";
 import adminRoutes from "./v1/routes/admin/adminRoutes.js";
 

@@ -1,7 +1,3 @@
-import * as userAuthModel from "../../v1/models/api/userModel.js";
-import fs from "node:fs";
-import path from "node:path";
-
 export const formatUrl = (fileName) => {
   if (!fileName || fileName === "null") return null;
 

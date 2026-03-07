@@ -1,5 +1,4 @@
 import * as jobModel from "../../models/admin/jobModel.js";
-import { pool } from "../../config/database.js";
 
 
 export const jobAssignmentPage = async (req, res) => {
