@@ -9,9 +9,7 @@
     name,
     email,
     phone,
-    device_type,
-    device_token,
-    time_zone,
+   
   }) => {
     try {
       const [exist] = await pool.execute(
@@ -25,17 +23,14 @@
 
       const [result] = await pool.execute(
         `INSERT INTO users
-        (name, email, phone, role, status, device_type, device_token, time_zone)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        (name, email, phone, role, status)
+        VALUES (?, ?, ?, ?, ?)`,
         [
           name,
           email,
           phone,
           1, // role = client
           "active",
-          device_type || null,
-          device_token || null,
-          time_zone || null,
         ],
       );
 
@@ -119,6 +114,7 @@ export const getClient = async (page = 1, limit = 10, search = "") => {
     SELECT id,name,email,phone
     FROM users
     WHERE role = 1
+      AND status != 'deleted'   -- ✅ hide deleted users
     ${where}
     ORDER BY id DESC
     LIMIT ? OFFSET ?
@@ -131,6 +127,7 @@ export const getClient = async (page = 1, limit = 10, search = "") => {
     SELECT COUNT(*) as total
     FROM users
     WHERE role = 1
+    AND status != 'deleted'   -- ✅ hide deleted users
     ${where}
     `,
     params
@@ -140,4 +137,25 @@ export const getClient = async (page = 1, limit = 10, search = "") => {
   const totalPages = Math.ceil(total / limit);
 
   return { clients: rows, totalPages };
+};
+
+export const findClientByEmail = async (email) => {
+
+  const [rows] = await pool.execute(
+    "SELECT id FROM users WHERE email = ? AND role = 'client'",
+    [email]
+  );
+
+  return rows[0] || null;
+};
+
+export const updateClient = async (id, name, email, phone) => {
+
+  await pool.execute(
+    `UPDATE users 
+     SET name = ?, email = ?, phone = ?
+     WHERE id = ? AND role = 'client'`,
+    [name, email, phone, id]
+  );
+
 };

@@ -110,52 +110,127 @@ import { pool } from "../../config/database.js";
 
     return rows;
   };
-  export const getAllJobs = async (page, limit, status = null, employeeId = null) => {
 
-    const offset = (page - 1) * limit;
+//  export const getAllJobs = async (page, limit, status = null, employeeId = null) => {
 
-    let whereClause = "WHERE j.status != 'deleted'";
-    let params = [];
+//   const offset = (page - 1) * limit;
 
-    if (status) {
-      whereClause += " AND j.status = ?";
-      params.push(status);
-    }
+//   let whereClause = "WHERE j.status != 'deleted' AND (u.status IS NULL OR u.status != 'deleted')";
+//   let params = [];
 
-    if (employeeId) {
-      whereClause += " AND j.user_id = ?";
-      params.push(employeeId);
-    }
+//   if (status) {
+//     whereClause += " AND j.status = ?";
+//     params.push(status);
+//   }
 
-    const [jobs] = await pool.execute(
-      `
-      SELECT 
-        j.*, 
-        u.name AS emp_name, 
-        u.email AS emp_email,
-        c.name AS client_name, 
-        c.email AS client_email
-      FROM jobs j
-      LEFT JOIN users u ON j.user_id = u.id
-      LEFT JOIN users c ON j.client_id = c.id
-      ${whereClause}
-      ORDER BY j.id DESC
-      LIMIT ? OFFSET ?
-      `,
-      [...params, limit, offset]
-    );
+//   if (employeeId) {
+//     whereClause += " AND j.user_id = ?";
+//     params.push(employeeId);
+//   }
 
-    const [count] = await pool.execute(
-      `SELECT COUNT(*) as total FROM jobs j ${whereClause}`,
-      params
-    );
+//   const [jobs] = await pool.execute(
+//     `
+//     SELECT 
+//       j.*, 
+//       u.name AS emp_name, 
+//       u.email AS emp_email,
+//       c.name AS client_name, 
+//       c.email AS client_email
+//     FROM jobs j
+//     LEFT JOIN users u ON j.user_id = u.id
+//     LEFT JOIN users c ON j.client_id = c.id
+//     ${whereClause}
+//     ORDER BY j.id DESC
+//     LIMIT ? OFFSET ?
+//     `,
+//     [...params, limit, offset]
+//   );
 
-    const totalPages = Math.ceil(count[0].total / limit);
+//   const [count] = await pool.execute(
+//     `SELECT COUNT(*) as total FROM jobs j
+//      LEFT JOIN users u ON j.user_id = u.id
+//      ${whereClause}`,
+//     params
+//   );
 
-    return { jobs, totalPages };
-  };
+//   const totalPages = Math.ceil(count[0].total / limit);
 
+//   return { jobs, totalPages };
+// };
   
+
+export const getAllJobs = async (
+  page,
+  limit,
+  status = null,
+  employeeId = null,
+  search = ""
+) => {
+
+  const offset = (page - 1) * limit;
+
+  let whereClause = "WHERE j.status != 'deleted' AND (u.status IS NULL OR u.status != 'deleted')";
+  let params = [];
+
+  if (status) {
+    whereClause += " AND j.status = ?";
+    params.push(status);
+  }
+
+  if (employeeId) {
+    whereClause += " AND j.user_id = ?";
+    params.push(employeeId);
+  }
+
+  // ⭐ SEARCH CONDITION
+  if (search) {
+    whereClause += `
+      AND (
+        j.title LIKE ?
+        OR j.description LIKE ?
+        OR u.name LIKE ?
+        OR c.name LIKE ?
+      )
+    `;
+
+    const searchValue = `%${search}%`;
+    params.push(searchValue, searchValue, searchValue, searchValue);
+  }
+
+  const [jobs] = await pool.execute(
+    `
+    SELECT 
+      j.*, 
+      u.name AS emp_name, 
+      u.email AS emp_email,
+      c.name AS client_name, 
+      c.email AS client_email
+    FROM jobs j
+    LEFT JOIN users u ON j.user_id = u.id
+    LEFT JOIN users c ON j.client_id = c.id
+    ${whereClause}
+    ORDER BY j.id DESC
+    LIMIT ? OFFSET ?
+    `,
+    [...params, limit, offset]
+  );
+
+  const [count] = await pool.execute(
+    `
+    SELECT COUNT(*) as total
+    FROM jobs j
+    LEFT JOIN users u ON j.user_id = u.id
+    LEFT JOIN users c ON j.client_id = c.id
+    ${whereClause}
+    `,
+    params
+  );
+
+  const totalPages = Math.ceil(count[0].total / limit);
+
+  return { jobs, totalPages };
+};
+
   export const updateJob = async (job) => {
     try {
       const {
@@ -292,6 +367,4 @@ import { pool } from "../../config/database.js";
 
   };
 
- 
- 
  

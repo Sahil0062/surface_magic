@@ -1,4 +1,4 @@
-    import * as supportModel from "../../models/api/supportModel.js";
+import * as supportModel from "../../models/api/supportModel.js";
 import { supportSchema } from "../../validations/api/authValidation.js";
 import { errorResponse } from "../../utils/response.js";
     

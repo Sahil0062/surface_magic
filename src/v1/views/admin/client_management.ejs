@@ -46,7 +46,7 @@
                                 <div class="form-group">
                                     <form method="GET" action="/admin/client" class="form-group d-flex">
 
-                                        <input type="text" name="search" value="<%= search || '' %>"
+                                        <input type="text" id="clientSearch" name="search" value="<%= search || '' %>"
                                             class="form-control" placeholder="Search clients...">
 
                                         <button type="submit">
@@ -74,8 +74,7 @@
 
                                             </tr>
                                         </thead>
-                                        <tbody>
-
+                                        <tbody id="clientTableBody">
                                             <% if (clients && clients.length> 0) { %>
                                                 <% clients.forEach(client=> { %>
 
@@ -94,8 +93,8 @@
 
                                                         <td>
                                                             <div class="action_btn">
-                                                                <a class="detele green"><i
-                                                                        class="bi bi-download"></i></a>
+                                                                <a class="detele green">
+                                                                    <i class="bi bi-download"></i></a>
                                                                 <!-- <a href="/admin/client/edit/<%= client.id %>" class="detele green">
                 <i class="bi bi-pencil-square"></i>
             </a> --><a class="detele green edit-client-btn" data-id="<%= client.id %>" data-name="<%= client.name %>"
@@ -110,7 +109,7 @@
                                                                 <a href="#" class="delete-client detele red"
                                                                     data-id="<%= client.id %>">
                                                                     <i class="bi bi-trash3"></i>
-                                                                </a>
+                                                                </a>    
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -133,14 +132,10 @@
                             </div>
 
                             <!-- Pagination -->
-                            <%- include('../partials/pagination', { 
-  currentPage, 
-  totalPages, 
-  baseUrl: `/admin/client`,
-  search
-}) %>
+                            <%- include('../partials/pagination', { currentPage, totalPages, baseUrl: `/admin/client`,
+                                search, status }) %>
                         </div>
-
+                                        
                         <!-- Footer -->
 
                         <%- include('../partials/footer') %>
@@ -348,11 +343,12 @@
 
                     const data = await res.json();
 
-                    // alert(data.message);
-
-                    if (res.ok) {
-                        location.reload();   // refresh table
+                    if (!res.ok) {
+                        alert(data.message); // show alert only for error
+                        return;
                     }
+
+                    location.reload(); // success → reload silently
 
                 } catch (err) {
                     console.error(err);
@@ -361,7 +357,33 @@
 
             });
     </script>
+    <script>
+        const searchInput = document.getElementById("clientSearch");
 
+        searchInput.addEventListener("input", function () {
+
+            const search = this.value;
+
+            fetch(`/admin/client?search=${encodeURIComponent(search)}`, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+                .then(res => res.text())
+                .then(html => {
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, "text/html");
+
+                    const newRows = doc.querySelector("#clientTableBody").innerHTML;
+
+                    document.getElementById("clientTableBody").innerHTML = newRows;
+
+                })
+                .catch(err => console.error("Search error:", err));
+
+        });
+    </script>
 </body>
 
 </html>

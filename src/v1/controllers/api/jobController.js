@@ -1,14 +1,15 @@
 import * as jobModel from "../../models/api/jobModel.js";
+import { formatUrl } from "../../constants/commonFunctions.js";
 
 export const fetchTodayJobs = async (req, res) => {
   try {
-    const user_id = req.user.id; // from auth middleware
+    const user_id = req.user.id;
 
     const jobs = await jobModel.getTodayJobs(user_id);
 
     return res.status(200).json({
       code: 200,
-      Message: "Today Jobs",
+      message: "Today Jobs",
       total_jobs: jobs.length,
       data: jobs,
     });
@@ -20,6 +21,7 @@ export const fetchTodayJobs = async (req, res) => {
     });
   }
 };
+
 export const fetchUpcomingJobs = async (req, res) => {
   try {
     const user_id = req.user.id;
@@ -28,7 +30,7 @@ export const fetchUpcomingJobs = async (req, res) => {
 
     return res.status(200).json({
       code: 200,
-      Message: "Upcoming Jobs",
+      message: "Upcoming Jobs",
       total_jobs: jobs.length,
       data: jobs,
     });
@@ -40,6 +42,7 @@ export const fetchUpcomingJobs = async (req, res) => {
     });
   }
 };
+
 export const getJobDetail = async (req, res) => {
   try {
 
@@ -51,13 +54,28 @@ export const getJobDetail = async (req, res) => {
     if (!job) {
       return res.status(404).json({
         code: 404,
-        Message: "Job not found or not assigned to this user",
+        message: "Job not found or not assigned to this user",
       });
+    }
+
+    // FORMAT PHOTOS
+    if (job.upload_photo) {
+      try {
+        const photos = JSON.parse(job.upload_photo);
+        job.upload_photo = photos.map(photo => formatUrl(photo));
+      } catch {
+        job.upload_photo = [];
+      }
+    }
+
+    // FORMAT SIGNATURE
+    if (job.client_signature) {
+      job.client_signature = formatUrl(job.client_signature);
     }
 
     return res.status(200).json({
       code: 200,
-      Message: "Job details fetched successfully",
+      message: "Job details fetched successfully",
       data: job,
     });
 
@@ -67,130 +85,11 @@ export const getJobDetail = async (req, res) => {
 
     return res.status(500).json({
       code: 500,
-      Message: "Server error",
+      message: "Server error",
     });
 
   }
 };
-
-export const clockIn = async (req, res) => {
-  try {
-
-    const { job_id } = req.body;
-    const userId = req.user.id;
-
-    await jobModel.clockIn(job_id, userId);
-
-    return res.status(200).json({
-      code: 200,
-      Message: "Clocked in successfully",
-    });
-
-  } catch (err) {
-
-    return res.status(500).json({
-      code: 500,
-      Message: "Clock in failed",
-    });
-
-  }
-};
-
-// export const markJobDone = async (req, res) => {
-//   try {
-
-//     const { job_id, note } = req.body;
-//     const userId = req.user.id;
-
-//     if (!job_id) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Job ID is required"
-//       });
-//     }
-
-//     const result = await jobModel.markJobDone(job_id, note, userId);
-
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Job not found or not assigned to you"
-//       });
-//     }
-
-//     return res.json({
-//       success: true,
-//       message: "Job marked as done"
-//     });
-
-//   } catch (err) {
-
-//     console.error(err);
-
-//     return res.status(500).json({
-//       success: false,
-//       message: "Server error"
-//     });
-
-//   }
-// };
-
-export const markJobDone = async (req, res) => {
-  try {
-
-    const { job_id, note } = req.body;
-    const userId = req.user.id;
-
-    if (!job_id) {
-      return res.status(400).json({
-        code: 400,
-        Message: "Job ID is required",
-      });
-    }
-
-    const result = await jobModel.markJobDone(job_id, note, userId);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
-        code: 404,
-        Message: "Job not found or not assigned to you",
-      });
-    }
-
-    return res.status(200).json({
-      code: 200,
-      Message: "Job marked as done",
-    });
-
-  } catch (err) {
-
-    console.error(err);
-
-    return res.status(500).json({
-      code: 500,
-      Message: "Server error",
-    });
-
-  }
-};
-
-// export const getMyJobs = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-
-//     const jobs = await jobModel.getEmployeeJobs(userId);
-
-//     res.json({
-//       success: true,
-//       data: jobs,
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       success: false,
-//       message: "Server error",
-//     });
-//   }
-// };
 
 export const getMyJobs = async (req, res) => {
   try {
@@ -199,9 +98,22 @@ export const getMyJobs = async (req, res) => {
 
     const jobs = await jobModel.getEmployeeJobs(userId);
 
+    jobs.forEach(job => {
+
+      if (job.upload_photo) {
+        const photos = JSON.parse(job.upload_photo);
+        job.upload_photo = photos.map(photo => formatUrl(photo));
+      }
+
+      if (job.client_signature) {
+        job.client_signature = formatUrl(job.client_signature);
+      }
+
+    });
+
     return res.status(200).json({
       code: 200,
-      Message: "Employee jobs fetched successfully",
+      message: "Employee jobs fetched successfully",
       total_jobs: jobs.length,
       data: jobs,
     });
@@ -210,44 +122,111 @@ export const getMyJobs = async (req, res) => {
 
     return res.status(500).json({
       code: 500,
-      Message: "Server error",
+      message: "Server error",
     });
 
   }
 };
-export const completeJob = async (req, res) => {
+
+export const updateJob = async (req, res) => {
   try {
 
-    const { job_id, signature } = req.body;
     const userId = req.user.id;
 
-    const photo = req.file ? req.file.filename : null;
+    const {
+      job_id,
+      clock_in,
+      job_done,
+      note,
+      clock_out
+    } = req.body;
 
     if (!job_id) {
       return res.status(400).json({
         code: 400,
-        Message: "Job ID is required",
+        message: "Job ID is required"
       });
     }
 
-    const result = await jobModel.completeJob(
-      job_id,
-      photo,
-      signature,
-      userId
-    );
+    // get current job
+    const job = await jobModel.getJobDetail(job_id, userId);
 
-    if (result.affectedRows === 0) {
+    if (!job) {
       return res.status(404).json({
         code: 404,
-        Message: "Job not found or not assigned to you",
+        message: "Job not found"
       });
     }
 
-    return res.status(200).json({
-      code: 200,
-      Message: "Job completed successfully",
-    });
+    // 🔹 STEP VALIDATION
+
+    if (clock_in && job.status !== "assigned") {
+      return res.status(400).json({
+        code: 400,
+        message: "You cannot clock in at this stage"
+      });
+    }
+
+    if (job_done && job.status !== "clocked_in") {
+      return res.status(400).json({
+        code: 400,
+        message: "You must clock in before marking job done"
+      });
+    }
+
+    if (clock_out && job.status !== "job_done") {
+      return res.status(400).json({
+        code: 400,
+        message: "Job must be marked done before completion"
+      });
+    }
+
+    const photos = req.files?.photos
+      ? req.files.photos.map(file => file.filename)
+      : null;
+
+    const signature = req.files?.signature
+      ? req.files.signature[0].filename
+      : null;
+
+    const signature_type = signature ? 1 : 0;
+
+    const result = await jobModel.updateJob({
+  job_id,
+  userId,
+  clock_in,
+  job_done,
+  note,
+  clock_out,
+  photos,
+  signature,
+  signature_type
+
+});
+
+// get updated job
+const updatedJob = await jobModel.getJobDetail(job_id, userId);
+
+// format photos
+if (updatedJob.upload_photo) {
+  try {
+    const photos = JSON.parse(updatedJob.upload_photo);
+    updatedJob.upload_photo = photos.map(photo => formatUrl(photo));
+  } catch {
+    updatedJob.upload_photo = [];
+  }
+}
+
+// format signature
+if (updatedJob.client_signature) {
+  updatedJob.client_signature = formatUrl(updatedJob.client_signature);
+}
+
+return res.status(200).json({
+  code: 200,
+  message: "Job updated successfully",
+  data: updatedJob
+});
 
   } catch (err) {
 
@@ -255,53 +234,80 @@ export const completeJob = async (req, res) => {
 
     return res.status(500).json({
       code: 500,
-      Message: "Server error",
+      message: "Server error"
+    });
+
+  }
+};  
+
+export const fetchJobs = async (req, res) => {
+  try {
+
+    const user_id = req.user.id;
+    const type = req.query.type; // upcoming or completed
+
+    let jobs;
+
+    if (type === "completed") {
+      jobs = await jobModel.getCompletedJobs(user_id);
+    } else {
+      jobs = await jobModel.getUpcomingJobs(user_id);
+    }
+
+    // ✅ get totals
+    const completedJobs = await jobModel.getCompletedJobs(user_id);
+    const upcomingJobs = await jobModel.getUpcomingJobs(user_id);
+
+    return res.status(200).json({
+      code: 200,
+      message: `${type || "Upcoming"} Jobs`,
+      total_completed_jobs: completedJobs.length,
+      total_upcoming_jobs: upcomingJobs.length,
+      data: jobs
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      code: 500,
+      message: "Server error"
     });
 
   }
 };
-// export const completeJob = async (req, res) => {
-//   try {
 
-//     const { job_id, signature } = req.body;
-//     const userId = req.user.id;
+export const fetchCustomerCompletedJobs = async (req, res) => {
+  try {
 
-//     const photo = req.file ? req.file.filename : null;
+    const user_id = req.user.id;
+    const client_id = req.query.client_id;   // same style as type
 
-//     if (!job_id) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Job ID is required"
-//       });
-//     }
+    if (!client_id) {
+      return res.status(400).json({
+        code: 400,
+        message: "Client ID is required"
+      });
+    }
 
-//     const result = await jobModel.completeJob(
-//       job_id,
-//       photo,
-//       signature,
-//       userId
-//     );
+    const jobs = await jobModel.getCustomerCompletedJobs(user_id, client_id);
 
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Job not found or not assigned to you"
-//       });
-//     }
+    return res.status(200).json({
+      code: 200,
+      message: "Customer completed jobs",
+      total_jobs: jobs.length,
+      data: jobs
+    });
 
-//     return res.json({
-//       success: true,
-//       message: "Job completed successfully"
-//     });
+  } catch (error) {
 
-//   } catch (err) {
+    console.error(error);
 
-//     console.error(err);
+    return res.status(500).json({
+      code: 500,
+      message: "Server error"
+    });
 
-//     return res.status(500).json({
-//       success: false,
-//       message: "Server error"
-//     });
-
-//   }
-// };
+  }
+};

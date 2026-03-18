@@ -53,17 +53,14 @@ const USER_COLUMNS = `
       const [result] = await pool.execute(
         `INSERT INTO users
         (name, email, phone, password, profile_image,
-        device_token, device_type, time_zone, role, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         role, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           data.name,
           data.email,
           data.phone || null,
           data.password || null,
           data.profile_image || null,
-          data.device_token || null,
-          data.device_type || null,
-          data.time_zone || null,
           data.role,
           data.status,
         ],
@@ -109,6 +106,7 @@ const USER_COLUMNS = `
       SELECT *
       FROM users
       WHERE status != 'deleted'
+      AND role = 0
       AND (name LIKE ? OR email LIKE ?)
       ORDER BY id DESC
       LIMIT ? OFFSET ?
@@ -118,6 +116,7 @@ const USER_COLUMNS = `
       SELECT COUNT(*) AS total
       FROM users
       WHERE status != 'deleted'
+      AND role = 0
       AND (name LIKE ? OR email LIKE ?)
     `, [`%${search}%`, `%${search}%`]);
 
@@ -126,6 +125,8 @@ const USER_COLUMNS = `
       total: count.total
     };
   };
+
+
   export const getEmployees = async (page = 1, limit = 10) => {
     const offset = (page - 1) * limit;
 
@@ -153,27 +154,61 @@ const USER_COLUMNS = `
       total: count.total,
     };
   };
-  export const updateEmployee = async ({ id, name, email, profile_image }) => {
-    if (profile_image) {
-      await pool.execute(
-        "UPDATE users SET name=?, email=?, profile_image=? WHERE id=?",
-        [name, email, profile_image, id],
-      );
-    } else {
-      await pool.execute("UPDATE users SET name=?, email=? WHERE id=?", [
-        name,
-        email,
-        id,
-      ]);
-    }
-  };
-  export const getEmployeess = async () => {
-    const [rows] = await pool.execute(
-      `SELECT id, name, email 
-      FROM users 
-      WHERE role = 0 AND status = 'active'
-      ORDER BY name`,
+  // export const updateEmployee = async ({ id, name, email, profile_image }) => {
+  //   if (profile_image) {
+  //     await pool.execute(
+  //       "UPDATE users SET name=?, email=?, profile_image=? WHERE id=?",
+  //       [name, email, profile_image, id],
+  //     );
+  //   } else {
+  //     await pool.execute("UPDATE users SET name=?, email=? WHERE id=?", [
+  //       name,
+  //       email,
+  //       id,
+  //     ]);
+  //   }
+  // };
+
+  export const updateEmployee = async ({ id, name, email, profile_image, password }) => {
+
+  if (profile_image && password) {
+
+    await pool.execute(
+      "UPDATE users SET name=?, email=?, profile_image=?, password=? WHERE id=?",
+      [name, email, profile_image, password, id]
     );
-    return rows;
-  };
+
+  } else if (profile_image) {
+
+    await pool.execute(
+      "UPDATE users SET name=?, email=?, profile_image=? WHERE id=?",
+      [name, email, profile_image, id]
+    );
+
+  } else if (password) {
+
+    await pool.execute(
+      "UPDATE users SET name=?, email=?, password=? WHERE id=?",
+      [name, email, password, id]
+    );
+
+  } else {
+
+    await pool.execute(
+      "UPDATE users SET name=?, email=? WHERE id=?",
+      [name, email, id]
+    );
+
+  }
+
+};
+    export const getEmployeess = async () => {
+      const [rows] = await pool.execute(
+        `SELECT id, name, email 
+        FROM users 
+        WHERE role = 0 AND status IN ('active', 'logout')
+        ORDER BY name`,
+      );
+      return rows;
+    };
 

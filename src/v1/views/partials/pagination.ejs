@@ -22,7 +22,7 @@
 
     <!-- PAGE NUMBERS -->
     <% for(let i = start; i <= end; i++) { %>
-        <a href="?page=<%= i %>"
+        <a href="?status=<%= status %>&page=<%= i %>"
            class="page-btn <%= i === currentPage ? 'active' : '' %>">
            <%= i %>
         </a>

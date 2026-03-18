@@ -36,3 +36,17 @@ export const getLeavesByUser = async (user_id) => {
 
   return rows;
 };
+
+export const checkExistingLeave = async (user_id, start_date, end_date) => {
+  const [rows] = await pool.execute(
+    `SELECT id
+     FROM leaves
+     WHERE user_id = ?
+     AND start_date = ?
+     AND end_date = ?
+     LIMIT 1`,
+    [user_id, start_date, end_date]
+  );
+
+  return rows[0];
+};

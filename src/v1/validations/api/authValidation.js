@@ -10,10 +10,14 @@ const DEVICE_TYPES = [1, 2]; // 1 = iOS, 2 = Android/Web
 
 /** Common fields */
 const emailField = Joi.string()
-  .email()
   .trim()
-  .lowercase()
-  .required();
+  .email()
+  .required()
+  .messages({
+    "string.email": "Please enter a valid email",
+    "string.empty": "Email is required",
+    "any.required": "Email is required"
+  });
 
 const passwordField = Joi.string()
   .min(PASSWORD_MIN)
@@ -61,6 +65,7 @@ export const signinSchema = Joi.object({
   password: Joi.string().trim().required(),
   device_type: deviceTypeField,
   device_token: deviceTokenField,
+  time_zone: Joi.string().allow(null, "").optional()
 })
   .unknown(false);
 

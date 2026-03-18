@@ -1,5 +1,5 @@
 import express from "express";
-
+import { adminAuth } from "../../middlewares/userAuthMiddleware.js";
 const router = express.Router();
 
 
@@ -10,12 +10,17 @@ import {
   getPendingLeaves
 } from "../../controllers/admin/dashboardController.js";
 
-/* ================= AUTH PAGES ================= */
+//* ================= AUTH CONTROLLER ================= */
 
 import {
+  // adminSignup,
+  adminLogin,
+  changeAdminPassword,
   loginPage,
-  changePasswordPage
-} from "../../controllers/admin/authPageController.js";
+  changePasswordPage,
+  logout
+} from "../../controllers/admin/adminAuthController.js";
+
 
 /* ================= EMPLOYEES ================= */
 
@@ -26,7 +31,8 @@ import {
   updateEmployee,
   deleteEmployee,
   employeeList,
-  getEmployeeJobsPage
+  getEmployeeJobsPage,
+  renderUserManagementView
 } from "../../controllers/admin/employeeController.js";
 
 /* ================= CLIENTS ================= */
@@ -74,15 +80,9 @@ import {
   privacyPage,
   termsPage,
   invoicePage
-} from "../../controllers/admin/miscPageController.js";
+} from "../../controllers/admin/staticPageController.js";
 
-//* ================= AUTH CONTROLLER ================= */
 
-import {
-  adminSignup,
-  adminLogin,
-  changeAdminPassword,
-} from "../../controllers/admin/adminAuthController.js";
 
 /* ================= MIDDLEWARE ================= */
 
@@ -107,17 +107,17 @@ import { validate } from "../../middlewares/validate.js";
 
 router.get("/login", loginPage);
 router.post("/login", adminLogin);
+router.post("/logout", authenticateAdmin, logout);
 
-router.post("/signup", upload.single("profile_image"), adminSignup);
+// router.post("/signup", upload.single("profile_image"), adminSignup);
 
 router.get("/change-password", changePasswordPage);
 router.post("/change-password", authenticateAdmin, changeAdminPassword);
 
 
-
 /* ================= DASHBOARD ================= */
 
-router.get("/dashboard", dashboardPage);
+router.get("/dashboard", dashboardPage,adminAuth);
 router.get("/pending-leaves", getPendingLeaves);
 
 
@@ -137,7 +137,7 @@ router.get("/profile-data", authenticateAdmin, getAdminProfile);
 
 /* ================= USERS / EMPLOYEES ================= */
 
-router.get("/user-management", userManagementPage);
+router.get("/user-management", userManagementPage,adminAuth);
 
 router.get("/employees", employeeList);
 
@@ -155,6 +155,8 @@ router.put(
   updateEmployee
 );
 
+router.get("/userManagementView", renderUserManagementView);
+
 router.post("/user/delete/:id", deleteEmployee);
 
 router.post("/user-status/:id", toggleUserStatus);
@@ -165,7 +167,7 @@ router.get("/employee-jobs/:id", getEmployeeJobsPage);
 
 /* ================= CLIENTS ================= */
 
-router.get("/client", clientManagementPage);
+router.get("/client", clientManagementPage,adminAuth);
 
 router.get("/clients", clientList);
 
@@ -179,7 +181,7 @@ router.delete("/client/delete/:id", deleteClient);
 
 /* ================= JOBS ================= */
 
-router.get("/job-assignment", jobAssignmentPage);
+router.get("/job-assignment", jobAssignmentPage,adminAuth);
 router.get("/job-detail", jobDetailPage);
 
 router.post("/create-job", addJob);
@@ -193,7 +195,7 @@ router.get("/job-detail/:id", getJobDetailPage);
 
 /* ================= LEAVES ================= */
 
-router.get("/leave-management", leaveManagementPage);
+router.get("/leave-management", leaveManagementPage,adminAuth);
 router.get("/leave-management/:userId", leaveManagementPage);
 
 router.post("/leave/:id/approve", approveLeave);

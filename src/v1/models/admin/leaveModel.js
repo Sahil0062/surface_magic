@@ -4,41 +4,60 @@
  /* -------------------------------------------------------------------------- */
   /*                                LEAVE MANAGEMENT                            */
   /* -------------------------------------------------------------------------- */
-  export const getAllLeaves = async (page = 1, limit = 10) => {
-    const offset = (page - 1) * limit;
+  export const getAllLeaves = async (page = 1, limit = 10, status = null) => {
 
-    const [rows] = await pool.execute(
-      `
-      SELECT 
-        l.id,
-        l.user_id,
-        u.name AS employee_name,
-        u.email AS employee_email,
+  const offset = (page - 1) * limit;
 
-        FROM_UNIXTIME(l.start_date/1000,'%d %b %Y') AS start_date,
-        FROM_UNIXTIME(l.end_date/1000,'%d %b %Y') AS end_date,
+  let where = "";
+  let params = [];
 
-        l.total_days,
-        l.reason,
-        l.status,
-        l.created_at
+  if (status) {
+    where = "WHERE l.status = ?";
+    params.push(status);
+  }
 
-      FROM leaves l
-      LEFT JOIN users u ON l.user_id = u.id
-      ORDER BY l.id DESC
-      LIMIT ? OFFSET ?
+  const [rows] = await pool.execute(
+    `
+    SELECT 
+      l.id,
+      l.user_id,
+      u.name AS employee_name,
+      u.email AS employee_email,
+
+      FROM_UNIXTIME(l.start_date/1000,'%d %b %Y') AS start_date,
+      FROM_UNIXTIME(l.end_date/1000,'%d %b %Y') AS end_date,
+
+      l.total_days,
+      l.reason,
+      l.status,
+      l.created_at
+
+    FROM leaves l
+    LEFT JOIN users u ON l.user_id = u.id
+    ${where}
+    ORDER BY l.id DESC
+    LIMIT ? OFFSET ?
     `,
-      [limit, offset],
-    );
+    [...params, limit, offset]
+  );
 
-    const [[count]] = await pool.execute(`SELECT COUNT(*) as total FROM leaves`);
+  const [countRows] = await pool.execute(
+    `
+    SELECT COUNT(*) as total 
+    FROM leaves l
+    ${where}
+    `,
+    params
+  );
 
-    return {
-      leaves: rows,
-      totalPages: Math.ceil(count.total / limit),
-      total: count.total,
-    };
+  const total = countRows[0].total;
+
+  return {
+    leaves: rows,
+    totalPages: Math.ceil(total / limit),
+    total,
   };
+};
   export const getLeaveStats = async () => {
     const [[row]] = await pool.execute(`
       SELECT
@@ -51,6 +70,7 @@
 
     return row;
   };
+  
   export const getLeavesByUser = async (userId, page = 1, limit = 10) => {
     const offset = (page - 1) * limit;
 
@@ -84,6 +104,7 @@
       totalPages: Math.ceil(count / limit),
     };
   };
+
   export const updateLeaveStatus = async (id, status) => {
     await pool.execute(`UPDATE leaves SET status=?, approved_at=? WHERE id=?`, [
       status,
@@ -127,17 +148,36 @@
 
     return rows;
   };
-  export const getPendingLeavesModel = async () => {
-    const [rows] = await pool.execute(`
-      SELECT 
-    u.id,
-    u.name,
-    u.email
-  FROM leaves l
-  JOIN users u ON u.id = l.user_id
-  WHERE l.status='pending'
-  ORDER BY l.id DESC
-    `);
+  // export const getPendingLeavesModel = async () => {
+  //   const [rows] = await pool.execute(`
+  //     SELECT 
+  //   u.id,
+  //   u.name,
+  //   u.email
+  // FROM leaves l
+  // JOIN users u ON u.id = l.user_id
+  // WHERE l.status='pending'
+  // ORDER BY l.id DESC
+  //   `);
 
-    return rows;
-  };
+  //   return rows;
+  // };
+
+  export const getPendingLeavesModel = async () => {
+  const [rows] = await pool.execute(`
+    SELECT 
+      l.id AS leave_id,
+      u.id AS user_id,
+      u.name,
+      u.email,
+      l.start_date,
+      l.end_date,
+      l.reason
+    FROM leaves l
+    JOIN users u ON u.id = l.user_id
+    WHERE l.status = 'pending'
+    ORDER BY l.id DESC
+  `);
+
+  return rows;
+};

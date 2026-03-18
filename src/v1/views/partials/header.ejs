@@ -3,21 +3,9 @@
     <div class="header-action">
       <!-- Menu Button -->
       <div class="toggle_btn toggle_menu">
-        <svg
-          stroke="currentColor"
-          fill="none"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-          height="1em"
-          width="1em"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M4 6h16M4 12h16M4 18h7"
-          ></path>
+        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" height="1em"
+          width="1em" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"></path>
         </svg>
       </div>
 
@@ -25,15 +13,12 @@
       <div class="search">
         <div class="open_search">
           <!-- <button class="btn" type="button" data-bs-toggle="collapse"
-                                            href="#multiCollapseSearch" role="button" aria-expanded="false"
-                                            aria-controls="multiCollapseSearch">
-                                            <i class="fa fa-search"></i>
-                                        </button> -->
+                                              href="#multiCollapseSearch" role="button" aria-expanded="false"
+                                              aria-controls="multiCollapseSearch">
+                                              <i class="fa fa-search"></i>
+                                          </button> -->
 
-          <div
-            class="collapse multi-collapse Dropdown_search"
-            id="multiCollapseSearch"
-          >
+          <div class="collapse multi-collapse Dropdown_search" id="multiCollapseSearch">
             <form action="">
               <div class="bg_color">
                 <div class="form-group">
@@ -50,11 +35,7 @@
     <div class="header-action-end">
       <!-- Notifications -->
       <div class="notification noty">
-        <a
-          type="button"
-          onclick="loadNotifications()"
-          data-bs-toggle="dropdown"
-        >
+        <a type="button" onclick="loadNotifications()" data-bs-toggle="dropdown">
           <i class="fa-regular fa-bell"></i>
           <span class="bell"></span>
         </a>
@@ -69,9 +50,9 @@
               <li class="text-center p-3">Loading...</li>
             </ul>
             <!-- 
-                                            <div class="view">
-                                                <a href="#">View All Notifications</a>
-                                            </div> -->
+                                              <div class="view">
+                                                  <a href="#">View All Notifications</a>
+                                              </div> -->
           </div>
         </div>
       </div>
@@ -79,7 +60,7 @@
       <!-- Profile -->
       <div class="profile">
         <a type="button" class="bell-btn" data-bs-toggle="dropdown">
-<img id="adminImage" class="pro" src="./images/blog3.jpg">        </a>
+          <img id="adminImage" class="pro" src="./images/blog3.jpg"> </a>
 
         <div class="dropdown-menu">
           <div class="profile_notify">
@@ -94,14 +75,11 @@
             <ul>
               <!-- <li><a href="/admin/profile"><i class="bi bi-person"></i>Profile</a></li> -->
               <li>
-                <a href="/admin/change-password"
-                  ><i class="bi bi-key"></i>Change Password</a
-                >
+                <a href="/admin/change-password"><i class="bi bi-key"></i>Change Password</a>
               </li>
               <li>
-                <a href="/admin/login"
-                  ><i class="bi bi-box-arrow-left"></i>Logout</a
-                >
+                <a href="/admin/login" onclick="confirmLogout(event)">
+                  <i class="bi bi-box-arrow-left"></i>Logout</a>
               </li>
             </ul>
           </div>
@@ -111,88 +89,150 @@
   </div>
 </header>
 <script>
+
+  // FORMAT DATE SAFELY
+  function formatDate(epoch) {
+
+    if (epoch === null || epoch === undefined) return "N/A";
+
+    let timestamp;
+
+    // handle BigInt
+    if (typeof epoch === "bigint") {
+      timestamp = Number(epoch);
+    }
+    // handle string numbers
+    else if (typeof epoch === "string") {
+      timestamp = Number(epoch);
+    }
+    // handle normal numbers
+    else {
+      timestamp = epoch;
+    }
+
+    if (!timestamp) return "N/A";
+
+    const date = new Date(timestamp);
+
+    if (isNaN(date.getTime())) return "N/A";
+
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  }
+
+  // LOAD LEAVE NOTIFICATIONS
   async function loadNotifications() {
     try {
+
       const res = await fetch("/admin/pending-leaves");
       const data = await res.json();
 
       const list = document.getElementById("leaveNotifications");
       const count = document.getElementById("notifCount");
+      const bell = document.querySelector(".bell");
 
-      // ⭐ CLEAR LIST FIRST
       list.innerHTML = "";
 
       if (!data.success || data.count === 0) {
+
         list.innerHTML = `<li class="text-center p-3">No Pending Leaves</li>`;
         count.innerText = "0 New";
+
+        if (bell) bell.style.display = "none";
+
         return;
       }
 
       count.innerText = data.count + " New";
 
-      let html = ""; // ⭐ build once
+      if (bell) bell.style.display = "inline-block";
+
+      let html = "";
 
       data.data.forEach((u) => {
+
+        console.log("start:", u.start_date, "end:", u.end_date);
+
+        const start = formatDate(u.start_date);
+        const end = formatDate(u.end_date);
+
         html += `
-  <li class="notify-item"
-      onclick="window.location='/admin/leave-management/${u.id}'"
-      style="cursor:pointer;">
-    <div class="notify-name">${u.name}</div>
-    <div class="notify-email">${u.email}</div>
-  </li>
-`;
+        <li class="notify-item"
+            onclick="window.location='/admin/leave-management/${u.user_id}'"
+            style="cursor:pointer">
+
+            <div class="notify-header">
+                <strong>${u.name}</strong>
+                <span class="status pending">Pending</span>
+            </div>
+
+            <div class="notify-dates">
+                📅 ${start} - ${end}
+            </div>
+
+            <div class="notify-reason">
+                📝 ${u.reason ?? "No reason"}
+            </div>
+
+            <div class="notify-email">
+                ${u.email}
+            </div>
+
+        </li>
+        `;
       });
 
-      list.innerHTML = html; // ⭐ set once
+      list.innerHTML = html;
+
     } catch (err) {
-      console.error(err);
+      console.error("Notification load error:", err);
     }
   }
- async function loadAdminProfile() {
-  try {
 
-    const token = localStorage.getItem("token");
-    console.log("Token from localStorage:", token);
 
-    if (!token) {
-      console.log("❌ No token found");
-      return;
-    }
+  // LOAD ADMIN PROFILE
+  async function loadAdminProfile() {
+    try {
 
-    const res = await fetch("/admin/profile-data", {
-      method: "GET",
-      headers: {
-        "Authorization": "Bearer " + token
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const res = await fetch("/admin/profile-data", {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+
+        document.getElementById("adminName").textContent = data.data.name;
+        document.getElementById("adminEmail").textContent = data.data.email;
+
+        const img = document.getElementById("adminImage");
+
+        if (data.data.profile_image) {
+          img.src = "/uploads/" + data.data.profile_image;
+        }
+
       }
-    });
 
-    console.log("Response status:", res.status);
-
-    const data = await res.json();
-    console.log("API response:", data);
-if (data.success) {
-
-  document.getElementById("adminName").textContent = data.data.name;
-  document.getElementById("adminEmail").textContent = data.data.email;
-
-  const img = document.getElementById("adminImage");
-
-  if (data.data.profile_image) {
-    img.src = "/uploads/" + data.data.profile_image;
+    } catch (err) {
+      console.error("Profile load error:", err);
+    }
   }
 
-}
 
-  } catch (err) {
-    console.error("Profile load error:", err);
-  }
-}
-
-
-document.addEventListener("DOMContentLoaded", loadAdminProfile);
-
-</script>
-<script>
-  document.addEventListener("DOMContentLoaded", loadNotifications);
+  // PAGE LOAD
+  document.addEventListener("DOMContentLoaded", () => {
+    loadAdminProfile();
+    loadNotifications();
+  });
 
 </script>

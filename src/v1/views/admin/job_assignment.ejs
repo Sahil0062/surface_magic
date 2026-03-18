@@ -41,22 +41,17 @@
               <!-- Common Search bar -->
               <div class="common_search">
                 <div class="form-group">
-    <form method="GET" action="/admin/job-assignment" class="form-group d-flex">
+                  <form method="GET" action="/admin/job-assignment" class="form-group d-flex">
 
-<input
-type="text"
-name="search"
-value="<%= search || '' %>"
-class="form-control"
-placeholder="Search jobs..."
->
+                    <input type="text" id="jobSearch" name="search" value="<%= search || '' %>" class="form-control"
+                      placeholder="Search jobs...">
 
-<button type="submit">
-<i class="bi bi-search"></i>
-</button>
+                    <button type="submit">
+                      <i class="bi bi-search"></i>
+                    </button>
 
-</form>
-  </div>
+                  </form>
+                </div>
 
                 <div class="filter">
                   <div class="dropdown">
@@ -123,7 +118,7 @@ placeholder="Search jobs..."
                           <td>
                             <div class="Website">
                               <%= job.title %>
-                                <span>
+                               <span class="job-desc">
                                   <%= job.description || '-' %>
                                 </span>
                             </div>
@@ -195,13 +190,8 @@ placeholder="Search jobs..."
               </div>
 
               <!-- Pagination -->
-              <%- include('../partials/pagination', {
-  currentPage,
-  totalPages,
-  baseUrl: '/admin/job-assignment',
-  search,
-  selectedStatus
-}) %>
+              <%- include('../partials/pagination', { currentPage, totalPages, baseUrl: '/admin/job-assignment' ,
+                search, status: selectedStatus }) %>
             </div>
 
             <!-- Footer -->
@@ -300,16 +290,16 @@ placeholder="Search jobs..."
         const userId = document.getElementById("jobUserId").value;
         const clientId = document.getElementById("jobClient").value;
 
-       if (!userId || !clientId) {
-  console.log("Employee and Client required");
-  return;
-}
+        if (!userId || !clientId) {
+          console.log("Employee and Client required");
+          return;
+        }
 
-const dateVal = document.getElementById("jobDate").value;
-if (!dateVal) {
-  console.log("Job Date required");
-  return;
-}
+        const dateVal = document.getElementById("jobDate").value;
+        if (!dateVal) {
+          console.log("Job Date required");
+          return;
+        }
 
         const body = {
           id: jobId || null,
@@ -473,6 +463,77 @@ if (!dateVal) {
       new bootstrap.Modal(document.getElementById("staticBackdrop_two")).show();
     }
   </script>
+  <script>
+    const searchInput = document.getElementById("jobSearch");
+
+    let timer;
+
+    searchInput.addEventListener("input", function () {
+
+      clearTimeout(timer);
+
+      timer = setTimeout(() => {
+
+        const query = searchInput.value;
+
+        fetch(`/admin/job-assignment?search=${query}`, {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        })
+          .then(res => res.text())
+          .then(html => {
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            const newTable = doc.querySelector(".job_table");
+            document.querySelector(".job_table").innerHTML = newTable.innerHTML;
+
+          });
+
+      }, 300);
+
+    });
+  </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const tooltip = document.createElement('div');
+  tooltip.className = 'custom-tooltip';
+  document.body.appendChild(tooltip);
+
+  document.querySelectorAll('.job-desc').forEach(desc => {
+
+    desc.addEventListener('mouseenter', (e) => {
+
+      const fullText = desc.innerText;
+
+      if (fullText.length > 0) {
+        tooltip.innerText = fullText;
+        tooltip.style.display = 'block';
+      }
+
+    });
+
+    desc.addEventListener('mousemove', (e) => {
+
+      tooltip.style.left = (e.pageX + 15) + 'px';
+      tooltip.style.top = (e.pageY + 15) + 'px';
+
+    });
+
+    desc.addEventListener('mouseleave', () => {
+
+      tooltip.style.display = 'none';
+
+    });
+
+  });
+
+});
+</script>
 </body>
 
 </html>

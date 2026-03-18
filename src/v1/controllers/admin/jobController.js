@@ -1,25 +1,39 @@
 import * as jobModel from "../../models/admin/jobModel.js";
 
-
 export const jobAssignmentPage = async (req, res) => {
   try {
 
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const status = req.query.status || null;
-    const employeeId = req.query.employee || null;   // ⭐ ADD THIS
-    const search = req.query.search || ""; 
+    const employeeId = req.query.employee || null;
+    const search = req.query.search || "";
 
-    const result = await jobModel.getAllJobs(page, limit, status, employeeId);
+    const result = await jobModel.getAllJobs(page, limit, status, employeeId, search);
 
+    // ✅ AJAX request (live search)
+    if (req.xhr) {
+      return res.render("admin/job_assignment", {
+        jobs: result.jobs,
+        currentPage: page,
+        totalPages: result.totalPages,
+        activePage: "jobs",
+        selectedStatus: status,
+        selectedEmployee: employeeId,
+        search,
+        layout: false
+      });
+    }
+
+    // ✅ Normal page render
     res.render("admin/job_assignment", {
       jobs: result.jobs,
       currentPage: page,
       totalPages: result.totalPages,
       activePage: "jobs",
-      selectedStatus: status || null,
-      selectedEmployee: employeeId || null,   // optional but useful
-      search  
+      selectedStatus: status,
+      selectedEmployee: employeeId,
+      search
     });
 
   } catch (err) {
@@ -32,7 +46,8 @@ export const jobAssignmentPage = async (req, res) => {
       totalPages: 1,
       activePage: "jobs",
       selectedStatus: null,
-      selectedEmployee: null
+      selectedEmployee: null,
+      search: ""
     });
 
   }
@@ -223,6 +238,8 @@ export const getJobDetailPage = async (req, res) => {
     const jobId = req.params.id;
 
     const job = await jobModel.getJobDetailModel(jobId);
+
+    
 
     res.render("admin/job_detail_view", {
       job,

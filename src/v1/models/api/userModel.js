@@ -19,7 +19,6 @@ const USER_COLUMNS = `
   updated_at
 `;
 
-
 export const getUserById = async (userId) => {
   try {
     if (!userId) return null;
@@ -40,10 +39,6 @@ export const getUserById = async (userId) => {
     throw new Error("Failed to fetch user");
   }
 };
-
-
-
-
 
 export const updateUserProfile = async ({ userId, name, profile_image }) => {
   const [result] = await pool.execute(
@@ -73,5 +68,21 @@ export const getUserDetail = async (userId) => {
   return user;
 };
 
+export const createLeave = async ({
+  user_id,
+  startEpoch,
+  endEpoch,
+  total_days,
+  reason,
+  status,
+  applied_by_admin = 0,
+}) => {
+  await pool.execute(
+    `INSERT INTO leaves
+     (user_id, start_date, end_date, total_days, reason, status, applied_by_admin)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [user_id, startEpoch, endEpoch, total_days, reason, status, applied_by_admin]
+  );
+};
 
 

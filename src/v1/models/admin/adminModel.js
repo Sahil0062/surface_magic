@@ -17,6 +17,7 @@
   /* -------------------------------------------------------------------------- */
   /*                               ADMIN AUTH                                   */
   /* -------------------------------------------------------------------------- */
+
   export const getAdminByEmail = async (email) => {
     const [rows] = await pool.execute(
       `SELECT id, name, email, password, profile_image, status
@@ -28,9 +29,11 @@
 
     return rows[0] || null;
   };
+
   export const updateAdminStatus = async (id, status) => {
     await pool.execute("UPDATE admin SET status=? WHERE id=?", [status, id]);
   };
+
   export const createAdmin = async (data) => {
     const { name, email, password, profile_image } = data;
 
@@ -43,19 +46,23 @@
 
     return result;
   };
+
     export const getAdminById = async (id) => {
       const [rows] = await pool.execute("SELECT * FROM admin WHERE id=?", [id]);
       return rows[0];
-    };
+  };
+
   export const updateAdminPassword = async (id, password) => {
     await pool.execute(
       "UPDATE admin SET password=?, updated_at=NOW() WHERE id=?",
       [password, id],
     );
   };
+
   export const updateAccessToken = async (id, token) => {
     await pool.execute("UPDATE admin SET access_token=? WHERE id=?", [token, id]);
   };
+
   export const updateAdminProfile = async ({
     id,
     name,
@@ -78,6 +85,7 @@
       );
     }
   };
+
   export const getAdminDetail = async (admin_id) => {
 
     const [rows] = await pool.execute(
@@ -94,8 +102,19 @@
     return rows[0];
   };
 
+export const logoutAdmin = async (admin_id) => {
 
+  const [result] = await pool.execute(
+    `UPDATE admin
+     SET access_token = NULL,
+         status = 0
+     WHERE id = ?`,
+    [admin_id]
+  );
 
+  return result;
+
+  };  
   
 
 

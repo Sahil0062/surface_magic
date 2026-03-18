@@ -1,3 +1,20 @@
+
+// Admin authentication check
+(function () {
+  const token = localStorage.getItem("token");
+
+  // check if we are on admin page
+  if (window.location.pathname.startsWith("/admin")) {
+
+    // allow login page without token
+    if (window.location.pathname === "/admin/login") return;
+
+    if (!token) {
+      window.location.href = "/admin/login";
+    }
+  }
+})();
+
 // Header Toggle
 
 $(".toggle_btn").click(function () {
@@ -58,3 +75,22 @@ Fancybox.bind("[data-fancybox]", {
     // Options
 });
 
+async function confirmLogout(e) {
+
+  e.preventDefault();
+
+  if (!confirm("Are you sure you want to logout?")) return;
+
+  const token = localStorage.getItem("token");
+
+  await fetch("/admin/logout", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  localStorage.removeItem("token");
+
+  window.location.href = "/admin/login";
+}

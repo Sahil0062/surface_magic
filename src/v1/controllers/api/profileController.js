@@ -19,7 +19,12 @@ export const updateProfile = async (req, res) => {
 
     const updatedUser = await userModel.getUserById(userId);
 
-    return successResponse(res, "Profile updated successfully", updatedUser, 200);
+    return successResponse(
+      res,
+      "Profile updated successfully",
+      updatedUser,
+      200,
+    );
   } catch (err) {
     console.error("Update profile error:", err);
     return errorResponse(res, "Internal server error", 500);

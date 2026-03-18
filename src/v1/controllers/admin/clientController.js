@@ -8,21 +8,37 @@ export const clientManagementPage = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
 
-    const search = req.query.search || ""; 
+    const search = req.query.search || "";
+    const status = req.query.status || ""; // ✅ ADD THIS
 
     const { clients, totalPages } = await clientModel.getClient(
       page,
       limit,
       search,
-    ); 
+      status
+    );
+
+    if (req.xhr) {
+      return res.render("admin/client_management", {
+        clients,
+        currentPage: page,
+        totalPages,
+        search,
+        status, // ✅ PASS
+        activePage: "client",
+        layout: false
+      });
+    }
 
     res.render("admin/client_management", {
       clients,
       currentPage: page,
       totalPages,
-      search, 
+      search,
+      status, // ✅ PASS
       activePage: "client",
     });
+
   } catch (err) {
     console.error(err);
     res.send("Error loading clients");
@@ -31,22 +47,17 @@ export const clientManagementPage = async (req, res) => {
 
 export const addClient = async (req, res) => {
   try {
-    const { name, email, phone, device_type, device_token, time_zone } =
+    const { name, email, phone } =
       req.body;
 
     if (!name || !email || !phone)
       return errorResponse(res, "Name, email and phone are required");
 
-    if (device_type && ![1, 2].includes(device_type))
-      return errorResponse(res, "device_type must be 1=apple or 2=android");
 
     const result = await clientModel.createClient({
       name,
       email,
       phone,
-      device_type,
-      device_token,
-      time_zone,
     });
 
     if (result?.error) return errorResponse(res, result.error);
@@ -62,8 +73,6 @@ export const addClient = async (req, res) => {
 
 export const updateClient = async (req, res) => {
   try {
-    console.log("BODY:", req.body);
-    console.log("ID:", req.params.id);
 
     const { name, email, phone } = req.body;
     const id = req.params.id;
@@ -85,6 +94,7 @@ export const updateClient = async (req, res) => {
     res.status(500).json({ message: "Update failed" });
   }
 };
+
 
 export const deleteClient = async (req, res) => {
   try {

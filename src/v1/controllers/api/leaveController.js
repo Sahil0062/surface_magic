@@ -2,17 +2,24 @@ import * as leaveModel from "../../models/api/leaveModel.js";
 
 export const applyLeave = async (req, res) => {
   try {
+
     const user_id = req.user.id;
     const { start_date, end_date, reason } = req.body;
 
     if (!start_date || !end_date)
-      return res.status(400).json({ message: "Start and End dates required" }); 
+      return res.status(400).json({
+        code:400,
+        message: "Start and End dates required"
+      });
 
     const startEpoch = new Date(start_date).setHours(0,0,0,0);
     const endEpoch   = new Date(end_date).setHours(0,0,0,0);
 
     if (endEpoch < startEpoch)
-      return res.status(400).json({ message: "End date must be after start date" });
+      return res.status(400).json({
+        code:400,
+        message: "End date must be after start date"
+      });
 
     // 🚫 14 DAY RULE
     const today = new Date();
@@ -28,8 +35,21 @@ export const applyLeave = async (req, res) => {
       });
     }
 
-    // ✅ Only pending now
-    const status = "pending";
+    // 🔎 CHECK DUPLICATE LEAVE
+    const existingLeave = await leaveModel.checkExistingLeave(
+      user_id,
+      startEpoch,
+      endEpoch,
+    );
+
+    if (existingLeave) {
+      return res.status(400).json({
+        code:400,
+        message: "Leave already applied for the same dates"
+      });
+    }
+
+    const status = "pending"; 
 
     const total_days =
       Math.ceil((endEpoch - startEpoch) / (1000*60*60*24)) + 1;
@@ -43,29 +63,43 @@ export const applyLeave = async (req, res) => {
       status
     });
 
-    res.json({ 
-      code :200,
-      message: "Leave applied successfully" });
+    return res.json({
+      code:200,
+      message: "Leave applied successfully"
+    });
 
   } catch (err) {
+
     console.error(err);
-    res.status(500).json({ message:"Server error" });
+
+    return res.status(500).json({
+      code:500,
+      message:"Server error"
+    });
   }
 };
 
 export const getMyLeaves = async (req, res) => {
   try {
-    const user_id = req.user.id;
 
+    const user_id = req.user.id;
     const leaves = await leaveModel.getLeavesByUser(user_id);
 
-    res.json({
+    return res.status(200).json({
       code: 200,
-      data: leaves,
+      message: leaves.length ? "Leaves fetched successfully" : "No leaves found",
+      total_leaves: leaves.length,
+      data: leaves
     });
 
   } catch (err) {
+
     console.error("Get leaves error:", err);
-    res.status(500).json({ message: "Server error" });
+
+    return res.status(500).json({
+      code: 500,
+      message: "Server error"
+    });
+
   }
 };

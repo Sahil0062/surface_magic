@@ -1,12 +1,13 @@
 import * as leaveModel from "../../models/admin/leaveModel.js";
 import * as userModel from "../../models/admin/userModel.js";
-import * as userModels  from "../../models/api/userModel.js";
+import * as userModels from "../../models/api/userModel.js";
 
 export const leaveManagementPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const userId = req.params.userId || null;
+    const status = req.query.status || null; // ✅ NEW
 
     let result;
     let stats;
@@ -19,7 +20,7 @@ export const leaveManagementPage = async (req, res) => {
 
       selectedEmployee = await userModel.getUserById(userId);
     } else {
-      result = await leaveModel.getAllLeaves(page, limit);
+      result = await leaveModel.getAllLeaves(page, limit, status); // ✅ UPDATED
 
       stats = await leaveModel.getLeaveStats();
     }
@@ -41,6 +42,7 @@ export const leaveManagementPage = async (req, res) => {
       selectedEmployee,
       success: req.query.success || null,
       activePage: "leave",
+      status,
     });
   } catch (err) {
     console.error("Leave Management Error:", err);
@@ -61,21 +63,30 @@ export const approveLeave = async (req, res) => {
   try {
     await leaveModel.updateLeaveStatus(req.params.id, "approved");
 
-    return res.redirect("/admin/leave-management");
+    const status = req.query.status;
+
+    return res.redirect(
+      `/admin/leave-management${status ? `?status=${status}` : ""}`
+    );
+
   } catch (err) {
     console.error("Approve Leave Error:", err);
-
     return res.status(500).send("Server error");
   }
 };
+
 export const rejectLeave = async (req, res) => {
   try {
     await leaveModel.updateLeaveStatus(req.params.id, "rejected");
 
-    return res.redirect("/admin/leave-management");
+    const status = req.query.status;
+
+    return res.redirect(
+      `/admin/leave-management${status ? `?status=${status}` : ""}`
+    );
+
   } catch (err) {
     console.error("Reject Leave Error:", err);
-
     return res.status(500).send("Server error");
   }
 };

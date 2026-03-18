@@ -52,7 +52,7 @@ export const getActiveUserByEmail = async (email) => {
     if (!email) return null;
 
     const [rows] = await pool.execute(
-      `SELECT ${USER_COLUMNS}, password
+      `SELECT *
        FROM users
        WHERE email = ?
        LIMIT 1`,
@@ -66,20 +66,43 @@ export const getActiveUserByEmail = async (email) => {
   }
 };
 
+// export const updateUserLogin = async ({
+//   userId,
+//   token,
+//   device_type,
+//   device_token,
+//   time_zone
+// }) => {
+//   try {
+//     if (!userId) return;
+
+//     await pool.execute(
+//       `UPDATE users
+//        SET access_token = ?, device_type = ?, device_token = ?,time_zone = ?, status = 'active'
+//        WHERE id = ?`,
+//       [token, device_type ?? null, device_token ?? null,time_zone ?? null, userId]
+//     );
+//   } catch (error) {
+//     console.error("DB:updateUserLogin", error);
+//     throw new Error("Failed to update login info");
+//   }
+// };
+
 export const updateUserLogin = async ({
   userId,
   token,
   device_type,
   device_token,
+  time_zone
 }) => {
   try {
     if (!userId) return;
 
     await pool.execute(
       `UPDATE users
-       SET access_token = ?, device_type = ?, device_token = ?, status = 'active'
+       SET access_token = ?, device_type = ?, device_token = ?, time_zone = ?
        WHERE id = ?`,
-      [token, device_type ?? null, device_token ?? null, userId]
+      [token, device_type ?? null, device_token ?? null, time_zone ?? null, userId]
     );
   } catch (error) {
     console.error("DB:updateUserLogin", error);

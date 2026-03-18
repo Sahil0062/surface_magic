@@ -1,133 +1,151 @@
-  <div class="sidebar">
+<div class="sidebar">
 
-                    <div class="top">
-                        <div class="toggle_close toggle_btn">
-                            <i class="bi bi-x-lg"></i>
-                        </div>
-                        <div class="logo">
-                            <img src="/assets/images/favicon.png" alt="logo">
-                            <span>Surface Magic <label>Restore & Repair Specialists</label></span>
-                        </div>
+    <div class="top">
+        <div class="toggle_close toggle_btn">
+            <i class="bi bi-x-lg"></i>
+        </div>
+        <div class="logo">
+            <img src="/assets/images/favicon.png" alt="logo">
+            <span>Surface Magic <label>Restore & Repair Specialists</label></span>
+        </div>
 
-                        <nav class="menu">
-                            <div class="menu-group">
-                                <div class="menu-title">Dashboard</div>
-                                <ul>
-                                    <li>
-                                        <a class="<%= activePage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">
- 
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round"
-                                                class="lucide lucide-layout-dashboard w-4 h-4 mr-2" aria-hidden="true">
-                                                <rect width="7" height="9" x="3" y="3" rx="1"></rect>
-                                                <rect width="7" height="5" x="14" y="3" rx="1"></rect>
-                                                <rect width="7" height="9" x="14" y="12" rx="1"></rect>
-                                                <rect width="7" height="5" x="3" y="16" rx="1"></rect>
-                                            </svg>
-                                            <span>Dashboard </span>
-                                        </a>
-                                    </li>
+        <nav class="menu">
+            <div class="menu-group">
+                <div class="menu-title">Dashboard</div>
+                <ul>
+                    <li>
+                        <a class="<%= activePage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">
 
-                                    <li>
-                                          <a class="<%= activePage === 'client' ? 'active' : '' %>" href="/admin/client">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-layout-dashboard w-4 h-4 mr-2"
+                                aria-hidden="true">
+                                <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+                                <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+                                <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+                                <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+                            </svg>
+                            <span>Dashboard </span>
+                        </a>
+                    </li>
 
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round"
-                                                class="lucide lucide-user-check w-4 h-4 mr-2" aria-hidden="true"
-                                                data-fg-rya19=":98.499:/components/Layout.tsx:73:19:2993:38:e:UserCheck::::::CFd7">
-                                                <path d="m16 11 2 2 4-4"></path>
-                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                                                <circle cx="9" cy="7" r="4"></circle>
-                                            </svg>
-                                            <span>Client Management</span>
-                                        </a>
-                                    </li>
+                    <li>
+                        <a class="<%= activePage === 'client' ? 'active' : '' %>" href="/admin/client">
 
-                                    <li>
-                                       <a class="<%= activePage === 'users' ? 'active' : '' %>" href="/admin/user-management">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-user-check w-4 h-4 mr-2" aria-hidden="true"
+                                data-fg-rya19=":98.499:/components/Layout.tsx:73:19:2993:38:e:UserCheck::::::CFd7">
+                                <path d="m16 11 2 2 4-4"></path>
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                            </svg>
+                            <span>Client Management</span>
+                        </a>
+                    </li>
 
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round"
-                                                class="lucide lucide-users w-4 h-4 mr-2" aria-hidden="true">
-                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                                                <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
-                                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                                                <circle cx="9" cy="7" r="4"></circle>
-                                            </svg>
-                                            <span>User Management</span>
-                                        </a>
-                                    </li>
+                    <li>
+                        <a class="<%= activePage === 'users' ? 'active' : '' %>" href="/admin/user-management">
 
-                                    
-
-                                    <li>
-                                        <a class="<%= activePage === 'jobs' ? 'active' : '' %>" href="/admin/job-assignment">
-
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round"
-                                                class="lucide lucide-briefcase w-4 h-4 inline mr-2" aria-hidden="true">
-                                                <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                                                <rect width="20" height="14" x="2" y="6" rx="2"></rect>
-                                            </svg>
-                                            <span>Job Assignment</span>
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="<%= activePage === 'leave' ? 'active' : '' %>" href="/admin/leave-management">
-                                            
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round"
-                                                class="lucide lucide-calendar-days w-4 h-4 mr-2" aria-hidden="true"
-                                                data-fg-rya19=":59.502:/components/Layout.tsx:73:19:2980:41:e:CalendarDays::::::BWP7">
-                                                <path d="M8 2v4"></path>
-                                                <path d="M16 2v4"></path>
-                                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                                                <path d="M3 10h18"></path>
-                                                <path d="M8 14h.01"></path>
-                                                <path d="M12 14h.01"></path>
-                                                <path d="M16 14h.01"></path>
-                                                <path d="M8 18h.01"></path>
-                                                <path d="M12 18h.01"></path>
-                                                <path d="M16 18h.01"></path>
-                                            </svg>
-                                            <span>Leave Management</span>
-                                        </a>
-                                    </li>
-
-                                    <li class="log_out">
-                                        <a href="/admin/login">
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M12 21C16.9705 21 21 16.9705 21 12C21 7.02944 16.9705 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9705 7.02944 21 12 21Z"
-                                                    stroke="#E90039" stroke-width="1.4" />
-                                                <path
-                                                    d="M7.53027 12.005H12.9076M12.9076 12.005C12.9076 12.516 11.2209 13.8127 11.2209 13.8127M12.9076 12.005C12.9076 11.4807 11.2209 10.218 11.2209 10.218M15.6303 9.30878V14.7087"
-                                                    stroke="#E90039" stroke-width="1.4" stroke-linecap="round" />
-                                            </svg>
-                                            <span>Logout</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </nav>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-users w-4 h-4 mr-2" aria-hidden="true">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                            </svg>
+                            <span>User Management</span>
+                        </a>
+                    </li>
 
 
-                    </div>
 
-                    <div class="term_menu">
+                    <li>
+                        <a class="<%= activePage === 'jobs' ? 'active' : '' %>" href="/admin/job-assignment">
 
-                        <ul>
-                            <li><a href="/admin/terms">Terms & Conditions</a></li>
-                            <li><span>|</span></li>
-                            <li><a href="/admin/privacy">Privacy Policy</a></li>
-                        </ul>
-                    </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-briefcase w-4 h-4 inline mr-2"
+                                aria-hidden="true">
+                                <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                <rect width="20" height="14" x="2" y="6" rx="2"></rect>
+                            </svg>
+                            <span>Job Assignment</span>
+                        </a>
+                    </li>
 
-                </div>
+                    <li>
+                        <a class="<%= activePage === 'leave' ? 'active' : '' %>" href="/admin/leave-management">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4 mr-2"
+                                data-fg-rya25="1.11:109.490:/components/Layout.tsx:95:19:3981:37:e:FileText::::::B1i5"
+                                data-fgid-rya25=":r4m:">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                <path d="M10 9H8"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                            </svg>
+                            <span>Invoice</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="<%= activePage === 'leave' ? 'active' : '' %>" href="/admin/leave-management">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-calendar-days w-4 h-4 mr-2"
+                                aria-hidden="true"
+                                data-fg-rya19=":59.502:/components/Layout.tsx:73:19:2980:41:e:CalendarDays::::::BWP7">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                                <path d="M8 14h.01"></path>
+                                <path d="M12 14h.01"></path>
+                                <path d="M16 14h.01"></path>
+                                <path d="M8 18h.01"></path>
+                                <path d="M12 18h.01"></path>
+                                <path d="M16 18h.01"></path>
+                            </svg>
+                            <span>Leave Management</span>
+                        </a>
+                    </li>
+
+
+
+
+                    <li class="log_out">
+                        <a href="/admin/login" onclick="confirmLogout(event)"> <svg width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 21C16.9705 21 21 16.9705 21 12C21 7.02944 16.9705 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9705 7.02944 21 12 21Z"
+                                    stroke="#E90039" stroke-width="1.4" />
+                                <path
+                                    d="M7.53027 12.005H12.9076M12.9076 12.005C12.9076 12.516 11.2209 13.8127 11.2209 13.8127M12.9076 12.005C12.9076 11.4807 11.2209 10.218 11.2209 10.218M15.6303 9.30878V14.7087"
+                                    stroke="#E90039" stroke-width="1.4" stroke-linecap="round" />
+                            </svg>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+
+    </div>
+
+    <div class="term_menu">
+
+        <ul>
+            <li><a href="/admin/terms">Terms & Conditions</a></li>
+            <li><span>|</span></li>
+            <li><a href="/admin/privacy">Privacy Policy</a></li>
+        </ul>
+    </div>
+
+</div>

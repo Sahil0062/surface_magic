@@ -4,39 +4,39 @@ import * as adminModel from "../../models/admin/adminModel.js";
 import { formatUrl } from "../../constants/commonFunctions.js";
 
 const SALT_ROUNDS = 10;
-export const adminSignup = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+// export const adminSignup = async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
 
-    const profile_image = req.file ? req.file.filename : null;
+//     const profile_image = req.file ? req.file.filename : null;
 
-    if (!name || !email || !password)
-      return res.status(400).json({ message: "All fields required" });
+//     if (!name || !email || !password)
+//       return res.status(400).json({ message: "All fields required" });
 
-    const exists = await adminModel.getAdminByEmail(email);
-    if (exists)
-      return res.status(400).json({ message: "Email already exists" });
+//     const exists = await adminModel.getAdminByEmail(email);
+//     if (exists)
+//       return res.status(400).json({ message: "Email already exists" });
 
-    const hash = await bcrypt.hash(password, SALT_ROUNDS);
+//     const hash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    const adminId = await adminModel.createAdmin({
-      name,
-      email,
-      password: hash,
-      profile_image,
-    });
+//     const adminId = await adminModel.createAdmin({
+//       name,
+//       email,
+//       password: hash,
+//       profile_image,
+//     });
 
-    return res.status(200).json({
-      message: "Admin created",
-      code: 200,
-      adminId,
-      profile_image: formatUrl(profile_image),
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+//     return res.status(200).json({
+//       message: "Admin created",
+//       code: 200,
+//       adminId,
+//       profile_image: formatUrl(profile_image),
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 
 export const adminLogin = async (req, res) => {
   try {
@@ -51,9 +51,6 @@ export const adminLogin = async (req, res) => {
     if (!admin)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    if (admin.status === 0)
-      return res.status(403).json({ message: "Admin blocked" });
-
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
@@ -61,7 +58,7 @@ export const adminLogin = async (req, res) => {
     const token = jwt.sign(
       { id: admin.id, role: "admin" },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" },
+      { expiresIn: "24h" },
     );
 
     await adminModel.updateAccessToken(admin.id, token);
@@ -111,5 +108,43 @@ export const changeAdminPassword = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const loginPage = (req, res) => {
+  res.render("admin/login");
+};
+
+export const changePasswordPage = (req, res) => {
+  res.render("admin/change_password", {
+    activePage: "changePassword",
+  });
+};
+
+export const logout = async (req, res) => {
+  try {
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    const adminId = req.user.id;
+
+    await adminModel.logoutAdmin(adminId);
+
+    res.json({
+      success: true,
+      message: "Logged out successfully"
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Logout failed"
+    });
   }
 };

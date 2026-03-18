@@ -24,6 +24,17 @@ export const userManagementPage = async (req, res) => {
         : null,
     }));
 
+    if (req.xhr) {
+  return res.render("admin/user_management", {
+    users: usersWithImage,
+    currentPage: page,
+    totalPages: Math.ceil(total / limit),
+    activePage: "users",
+    search,
+    layout: false
+  });
+}
+
     res.render("admin/user_management", {
       users: usersWithImage,
       currentPage: page,
@@ -37,9 +48,15 @@ export const userManagementPage = async (req, res) => {
   }
 };
 
+export const renderUserManagementView = (req, res) => {
+  res.render("admin/userManagementView", {
+    activePage: "user-management"
+  });
+};
+
 export const addEmployee = async (req, res) => {
   try {
-    const { name, email, password, device_token, device_type, time_zone } =
+    const { name, email, password } =
       req.body;
 
     if (!name || !email || !password)
@@ -56,11 +73,8 @@ export const addEmployee = async (req, res) => {
       email,
       password: hashedPassword,
       profile_image,
-      device_token: device_token || null,
-      device_type: device_type || null,
-      time_zone: time_zone || null,
       role: 0,
-      status: "active",
+      status: "inactive",
     });
 
     const user = await userModel.getUserById(userId);
@@ -96,30 +110,44 @@ return res.status(200).json({
 
 export const updateEmployee = async (req, res) => {
   try {
+
     const id = req.params.id;
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
+
     const image = req.file ? req.file.filename : null;
 
-    const result = await userModel.updateEmployee({
+    let updateData = {
       id,
       name,
       email,
-      profile_image: image,
-    });
+      profile_image: image
+    };
+
+    // ✅ Only update password if admin entered one
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
+    }
+
+    const result = await userModel.updateEmployee(updateData);
 
     console.log("SQL Result:", result);
 
-return res.status(200).json({
-  message: "Employee updated successfully",
-  code: 200
-});
+    return res.status(200).json({
+      message: "Employee updated successfully",
+      code: 200
+    });
 
-} catch (err) {
+  } catch (err) {
+
     console.error(err);
-return res.status(500).json({
-  message: "Error updating employee",
-  code: 500
-});  }
+
+    return res.status(500).json({
+      message: "Error updating employee",
+      code: 500
+    });
+
+  }
 };
 
 export const deleteEmployee = async (req, res) => {

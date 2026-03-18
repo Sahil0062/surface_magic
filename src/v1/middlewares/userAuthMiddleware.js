@@ -51,19 +51,6 @@ export const authenticateUser = async (req, res, next) => {
   }
 };
 
-// export const authenticateAdmin = async (req, res, next) => {
-//   try {
-//     const token = req.headers.authorization?.split(" ")[1];
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-//     console.log("Decoded ID:", decoded.id);
-
-//     req.user = decoded;
-//     next();
-//   } catch (err) {
-//     res.status(401).json({ message: "Invalid token" });
-//   }
-// };
 
 export const authenticateAdmin = async (req, res, next) => {
   try {
@@ -87,5 +74,26 @@ export const authenticateAdmin = async (req, res, next) => {
   } catch (err) {
     console.error("Admin auth error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const adminAuth = (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.redirect("/admin/login");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded || decoded.role !== "admin") {
+      return res.redirect("/admin/login");
+    }
+
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    return res.redirect("/admin/login");
   }
 };
